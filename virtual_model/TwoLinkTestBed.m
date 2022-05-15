@@ -8,10 +8,13 @@ clear;
 close all;
 
 %% Initialization
-tf=100;
+tf=10;
 x0_s=[-80 -20 0 0];              %Setting initial conditions for the state vector [q1, q2, q1_dot, q2_dot]
 k_spring=[400 0];                %proportional and derivative gain for the spring [kp, kd]
 k_position=[100 0];              %proportional and derivative gain for the spring position [kp kd]
+m=60;
+epsilon = 0.5;
+A=0.2;
 
 %% Built-in Link Properties, no need to worry
 
@@ -24,10 +27,11 @@ d = I2+ m2*r2^2;
 system = {I1,I2,m1,m2,l1,l2,r1,r2,g};  %System List
 
 
-%% Implement the Virtual Model control, this is crucial
+%% Implement the Virtual Model control or ANO control
 params = {k_spring, k_position};
 options = odeset('RelTol',1e-4,'AbsTol',[1e-4, 1e-4, 1e-4, 1e-4]);
 [T,W] = ode45(@(t,w) VirtualModelControl(t,w,system,params),[0 tf],x0_s, options);
+% [T,W] = ode45(@(t,w) ANOControl(t,w,system,params,m,epsilon,A),[0 tf],x0_s, options);
 
 
 figure(1);

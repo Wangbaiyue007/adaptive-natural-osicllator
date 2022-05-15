@@ -13,7 +13,7 @@ quivers = quiver3([0.0; 0.0], [0.0; 0.0], [0.0; 0.0], [0.0; 0.0], [0.0; 0.0], [1
 [link2, verts2] = linkGeneration();
 
 %provide an offset for verts 2
-z_offset = -0.1;
+z_offset = -0.0;
 verts2 = bsxfun(@plus, verts2, [0.0, 0.0, z_offset]);
 
 xlim([-2.25 2.25])

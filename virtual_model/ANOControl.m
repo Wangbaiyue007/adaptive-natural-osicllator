@@ -1,7 +1,5 @@
-%% Virtual Model controller (spring-mass), with only proportional control
-
-
-function dx = VirtualModelControl(t,x,measurements,params)
+function dx = ANOControl(t,x,measurements,params,m,epsilon,A)
+%% Controller with ANO
 
 %% User parameters that should be tuned later
 % Getting K_P and K_D as a positive definite, symmetric, diagonal matrix
@@ -48,22 +46,32 @@ J = [Jv; Jw];
 
 % Current spring position
 L_spring = norm(O_02, 2); % virtual spring length
+v = J * [x(3); x(4)];
+v = v(1:2);
+L_spring_rate = O_02' * v / (L_spring);
 q_spring = atan(O_02(2)/O_02(1));
 
 % Desired spring position
-L_spring_des = 0.8;
+L_0 = 0.8;
 q_spring_des = 0;
 
 % Error vector
-e = [L_spring_des-L_spring q_spring_des-q_spring];
+e = [L_0-L_spring q_spring_des-q_spring];
+xr = e(1);
+
+% 
+omega_n = sqrt(K_sp/m);
+p = 1 + epsilon*m*(-L_spring_rate)*xr/A;
+omega_square = L_spring_rate^2 / abs(A^2 - xr);
+z = -epsilon*m^2*A*(-L_spring_rate)*(omega_square - omega_n^2)*xr^2/(A^2*p);
+F_ANO = (-m*omega_square + K_sp)*xr - z;
 
 % Command endpoint force according to desire. F_spring is the virtual
 % spring force, T_spring is the turque to adjust angular position
-F_spring = e(1)*(K_sp); % magnitude
-F_spring = F_spring.*O_02./L_spring; % magnitude and direction, 2-d vector
+F_spring = F_ANO.*O_02./L_spring; % magnitude and direction, 2-d vector
 T_spring = e(2)*(K_tp); % turque magnitude, a force tangent to spring
 T_spring = T_spring.*I_skew*O_02./L_spring; % magnitude and direction, 3-d vector
-F = [F_spring+T_spring; [0 0 0]']; % composition of force and torque
+F = [F_spring+0; [0 0 0]']; % composition of force and torque
 
 % Input controller u for two joints
 u = J'*F;
@@ -81,5 +89,5 @@ dx(1:2) = q_dot;
 % the input controller u
 q_double_dot = invM * (u - Cmat*q_dot - 0);
 dx(3:4) = q_double_dot;
-
 end
+
