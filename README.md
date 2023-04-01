@@ -1,5 +1,5 @@
 # LEXO-ANO
-control and simulation for an exo-skeleton LEXO from STARX @ UMich  
+control and simulation for an exo-skeleton LEXO from STARX @ U-M  
 This is a simple demo of our control and parameters are not tuned yet.
 ## Instruction
 Run `ANO_sim\Ano_sim.m` to see state space simulation of the Adaptive Natural Oscillator.
